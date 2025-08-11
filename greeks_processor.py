@@ -1,3 +1,4 @@
+from tabulate import tabulate
 
 import numpy as np
 import scipy.stats as st
@@ -101,16 +102,14 @@ def run_Greeks(S, K, T, r, sigma, y, output):
 
     Greeks_call_table["Value"] = Greeks_call_table["Value"].round(4)
     Greeks_put_table["Value"] = Greeks_put_table["Value"].round(4)
-    print('\n\n')
-    print("Call Option Greeks Parameter Estimate")
-    print(Greeks_call_table.to_string(index=False))
-    print('\n\n')
 
     print('\n\n')
-    print("Put Option Greeks Parameter Estimate")
-    print(Greeks_put_table.to_string(index=False))
+    print('\nCall Option Greeks Parameter Estimate')
+    print(tabulate(Greeks_call_table, headers="keys", tablefmt="fancy_grid", showindex=False))
     print('\n\n')
-
+    print('\nPut Option Greeks Parameter Estimate')
+    print(tabulate(Greeks_put_table, headers="keys", tablefmt="fancy_grid", showindex=False))
+    print('\n\n')
 
     Delta_vals = []
     Theta_vals = []

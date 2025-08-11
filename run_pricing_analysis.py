@@ -20,9 +20,12 @@ import yfinance as yf
 import datetime
 import pandas as pd
 from datetime import datetime, timedelta
+from tabulate import tabulate
+from termcolor import colored
 
 import pricing_processor
 import greeks_processor
+
 
 def company_option(company, expiry, strike_price):
     stock = yf.Ticker(company)
@@ -70,8 +73,8 @@ def company_option(company, expiry, strike_price):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='You can customize your run')
-    parser.add_argument('--stock','-S' , default=100.0, help = 'input stock price')
-    parser.add_argument('--time', '-T' , default=1.0, help = 'input time to maturity')
+    parser.add_argument('--stock','-S' , type=float, default=100.0, help = 'input stock price')
+    parser.add_argument('--time', '-T' , type=float, default=1.0, help = 'input time to maturity')
     parser.add_argument('--strike','-K',  type=float, default=100.0, help = 'input strike price')
     parser.add_argument('--interest', '-r' , type=float, default=0.05, help = 'input interest rate')
     parser.add_argument('--volatility', '-sg', type=float, default=0.2, help = 'input volatility')
@@ -79,6 +82,7 @@ if __name__ == '__main__':
     parser.add_argument('--output','-o'   , default='plots', help = 'Name of the output directory')
     parser.add_argument('--company', '-c', default=None, help = 'input the company name for online info')
     parser.add_argument('--expiry', '-e', default='', help = 'input expiry date')
+    parser.add_argument('--run-greeks',  action='store_true', help = 'run greeks analysis') 
 
     args = parser.parse_args()
     stock      = args.stock
@@ -90,12 +94,12 @@ if __name__ == '__main__':
     output     = args.output
     company    = args.company
     expiry     = args.expiry
-
+    run_greeks = args.run_greeks
     #today = pd.Timestamp.now()
     today = datetime.now().date()
 
     print('\n')
-    print(f"Stock Info for {company}")
+    print(f"time to Maturity in year")
     if expiry:
        expiry_strp = datetime.strptime(expiry, '%Y-%m-%d').date()
 
@@ -106,13 +110,42 @@ if __name__ == '__main__':
 
     if company:
         stock, call_price, put_price, volatility_est, dividend_company, interest = company_option(company=company, expiry=expiry, strike_price=strike)
-        print("Most recent closing stock price:", stock)
-        print("call price:", call_price)
-        print("put price:", put_price)
-        print("volatility:", volatility_est)
-        print("interest rate", interest)
-        print("dividend yield", dividend_company)
+
+        company_table = pd.DataFrame({
+            "Parameter": [
+                "Most Recent Closing Stock Price",
+                "Strike Price",
+                "Call Price",
+                "Put Price",
+                "Volatility",
+                "Interest Rate",
+                "Dividend Yield",
+                "Time to Expiry (Years)"
+            ],
+            "Value": [
+                stock,
+                strike,
+                call_price,
+                put_price,
+                volatility_est,
+                interest,
+                dividend_company,
+                expiry
+            ]
+        })
+    #company_table["Value"] = company_table["Value"].round(4)
+
+        company_table["Value"] = company_table.apply(
+            lambda row: colored(round(row["Value"], 4), 'green') 
+                        if row["Parameter"] in ["Call Price", "Put Price"] 
+                        else row["Value"],
+            axis=1
+        )
+        print(f"\nStock Info for {company}")
+        print(tabulate(company_table, headers="keys", tablefmt="fancy_grid", showindex=False))
+
 
     pricing_processor.run_pricing(S=stock, T=time, K=strike, r=interest, sigma=volatility, y=dividend, output=output)
-    greeks_processor.run_Greeks(S=stock, K=strike, T=time, r=interest, sigma=volatility, y=dividend, output=output) 
+    if run_greeks:
+        greeks_processor.run_Greeks(S=stock, K=strike, T=time, r=interest, sigma=volatility, y=dividend, output=output) 
          

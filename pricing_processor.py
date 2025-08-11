@@ -18,12 +18,15 @@ import os
 from scipy.sparse import diags
 from scipy.sparse.linalg import spsolve
 from math import sqrt
-
-
+from scipy.interpolate import RegularGridInterpolator
+from joblib import Parallel, delayed
+from tabulate import tabulate
+from termcolor import colored
 
 # Returns call or put option prices using Black-Scholes equations
 def Option_price(S, K, T, r, sigma, y=0, option='call'):
 
+    # If option already expires
     if T <= 0:
         if option == 'call':
             return max(S - K, 0)
@@ -36,6 +39,7 @@ def Option_price(S, K, T, r, sigma, y=0, option='call'):
     estimated_call = S * np.exp(-y * T) * st.norm.cdf(d1) - K * np.exp(-r * T) * st.norm.cdf(d2)
     estimated_put  = K * np.exp(-r * T) * st.norm.cdf(-d2) - S * np.exp(-y * T) * st.norm.cdf(-d1)
 
+    # option pricing estimates
     if option == 'call':
         return float(estimated_call)
     else:
@@ -138,6 +142,8 @@ def add_arrows(ax, x, y, z, invert_x=False):
 
 def run_pricing(S, K, T, r, sigma, y, output):
 
+    # Visualization from Black-Scholes equations
+
     estimated_call = Option_price(S, K, T, r, sigma, y, option='call')
     estimated_put  = Option_price(S, K, T, r, sigma, y, option='put')
 
@@ -149,13 +155,17 @@ def run_pricing(S, K, T, r, sigma, y, output):
         "Value": [S, K, T, r, sigma, y, estimated_call, estimated_put]
     })
 
-    Pricing_table["Value"] = Pricing_table["Value"].round(4)
+    Pricing_table["Value"] = Pricing_table.apply(
+        lambda row: colored(round(row["Value"], 4), 'green') if "Estimated" in row["Parameter"] else str(round(row["Value"], 4)),
+        axis=1
+    )
+    #Pricing_table["Value"] = Pricing_table["Value"].round(4)
     print('\n\n')
     print("Option Pricing with BS estimation (Non-Dividend)")
-    print(Pricing_table.to_string(index=False))
+    #print(Pricing_table.to_string(index=False))
+    print(tabulate(Pricing_table, headers="keys", tablefmt="fancy_grid", showindex=False))
     print('\n\n')
 
-    # Plotting code assited by AI
     S_range, T_range  = np.linspace(0.5*K, 1.5*K, 100), np.linspace(0, 1.0, 100)
     S_bin, T_bin= np.meshgrid(S_range, T_range)
 
@@ -166,7 +176,7 @@ def run_pricing(S, K, T, r, sigma, y, output):
 
     BS_label = f"Stike Price:{K}, Interest Rate:{r}, Volatility:{sigma}, Dividend:{y}"
 
-
+    # call 3D map
     figure1 = plt.figure(figsize=(10, 7))
     figure_call = figure1.add_subplot(111, projection='3d')
     subplot_call = figure_call.plot_surface(S_bin, T_bin, call_prices, cmap='cividis', edgecolor='none')
@@ -186,6 +196,7 @@ def run_pricing(S, K, T, r, sigma, y, output):
     plt.close(figure1)
     print(f"call_option_3D_map.png saved in \{output}")
 
+    # put 3D map
     figure2 = plt.figure(figsize=(10, 7))
     figure_put = figure2.add_subplot(111, projection='3d')
     subplot_put = figure_put.plot_surface(S_bin, T_bin, put_prices, cmap='plasma', edgecolor='none')
@@ -200,7 +211,7 @@ def run_pricing(S, K, T, r, sigma, y, output):
     plt.close(figure2)
     print(f"put_option_3D_map.png saved in \{output}")
 
-    # Call 2D Map
+    # call 2D map
     plt.figure(figsize=(8, 6))
     plt.imshow(call_prices, origin='lower', aspect='auto', cmap='viridis',
            extent=[S_range[0], S_range[-1], T_range[0], T_range[-1]])
@@ -218,7 +229,7 @@ def run_pricing(S, K, T, r, sigma, y, output):
     plt.close()
     print(f"call_option_2D_map.png saved in \{output}")
 
-    # Put 2D Map
+    # put 2D map
     plt.figure(figsize=(8, 6))
     plt.imshow(put_prices, origin='lower', aspect='auto', cmap='plasma',
            extent=[S_range[0], S_range[-1], T_range[0], T_range[-1]])
@@ -237,8 +248,47 @@ def run_pricing(S, K, T, r, sigma, y, output):
     print(f"put_option_2D_map.png saved in \{output}")
 
 
-    ##############  BS PDE Pricing ##############
+    # Crank-Nicolson PDE visualization
 
+    pde_price = crank_nicolson_call(S,K,T,r,sigma,Smax_factor=4.0,M=400,N=400)
+
+    S_range2 = np.linspace(20, 200, 50)
+    T_range2 = np.linspace(0.05, 2, 50)
+    S_bin, T_bin = np.meshgrid(S_range2, T_range2)
+    S_flat = S_bin.ravel()
+    T_flat = T_bin.ravel()
+
+    # parallel computing for higher speed
+    results = Parallel(n_jobs=-1, verbose=5)(
+        delayed(crank_nicolson_call)(
+            S_flat[k], K, T_flat[k], r, sigma,
+            Smax_factor=4.0, M=400, N=400
+        )
+        for k in range(len(S_flat))
+    )
+
+    pde_price = np.array(results).reshape(S_bin.shape)
+
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection='3d')
+    surf = ax.plot_surface(S_bin, T_bin, pde_price, cmap='viridis', edgecolor='none')
+
+    ax.set_title(f'Call Option Price 3D Mapping\n Crank–Nicolson PDE \n({BS_label})')
+    ax.set_xlabel('Stock Price')
+    ax.set_ylabel('Time to Maturity')
+    ax.set_zlabel('Option Price')
+
+    ax.invert_xaxis()
+    add_arrows(ax, ax.get_xlim(), ax.get_ylim(), ax.get_zlim(), invert_x=True)
+
+    fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, label='Price')
+    plt.tight_layout()
+    fig.savefig(os.path.join(output, "call_option_3D_map_PDE.png"), dpi=300, bbox_inches='tight')
+    plt.close(fig)
+    print(f"call_option_3D_map_PDE.png saved in {output}")
+
+
+    # Error convergence for agreement between models 
     pde_price = crank_nicolson_call(S,K,T,r,sigma,Smax_factor=4.0,M=400,N=400)
     print("CN PDE price:", pde_price)
 
@@ -258,7 +308,7 @@ def run_pricing(S, K, T, r, sigma, y, output):
     plt.ylabel('Absolute error')
     plt.title('Grid convergence (CN)')
     plt.grid(True, which='both', ls='--')
-    plt.savefig(os.path.join(output,"pde_price_surface.png"), dpi=300, bbox_inches="tight")
+    plt.savefig(os.path.join(output,"pde_error_convergence.png"), dpi=300, bbox_inches="tight")
     plt.close()
 
 
