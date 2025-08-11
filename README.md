@@ -1,6 +1,9 @@
 # OptionQuantLab
-This repo implements various calculation for options, including Black-Scholes equations, PDE, Greeks and Geometric MC progression.
+This quant lab repo is built for exploring and visualizing various financial theories, as well as observing how they are applied to real market parameters.
+It implements multiple calculations for options, including Black-Scholes equations, PDE and Greeks.
+BS equations here are typically used for European options with non-dividend yields, while PDE are considered more for American options with early-excercise.
 Users can access online stock information as parameter inputs for more real-scenario analysis.
+
 
 ## Installation Steps
 #### 1. Get this repository by running:
@@ -49,6 +52,13 @@ The functions are implemented in script `pricing_processor.py` as an import fo `
 ```
 python run_pricing_analysis.py
 ```
+Below are example plots for the call and put options according to BS equations
+
+<img width="1329" height="1067" alt="call_option_3D_map" src="https://github.com/user-attachments/assets/4bd5366f-4ba9-4bad-acab-1f6a3137b155" />
+
+<img width="1329" height="1067" alt="put_option_3D_map" src="https://github.com/user-attachments/assets/12f5bc64-1545-47b2-a44d-e408ecf61556" />
+
+
 
 #### 2. Real-stock data
 To obtain a specific company information, including the latest closing stock price, strike prices at specific dates, use command option `-c`, `-e` and `-K` run:
@@ -59,4 +69,10 @@ If such date isn't a valid expiry date, the code would print out available dates
 
 This returns the real option prices accordingly.
 
-#### 3. Comparison between real prices and estimated prices
+#### 3. Running the Greeks
+The Greeks parameters are incorporated in script `greeks_processor.py`
+You can also run the Greek calculations including Delta, Gamma, Theta, and Vega that measure how the option prices are sensitive to underlying stock price, time and volatility.
+```
+python run_pricing_analysis.py --run-greeks
+```
+
