@@ -208,6 +208,10 @@ In the meantime, it produces a strategy for dynamic hedging by longing call opti
 ```
 python run_pricing_analysis.py --run-greeks -M 20 -N 20 -options 200
 ```
+The below print out returns 10 mc paths with estimated P&L using delta hedging.
+
+<img width="300" height="174" alt="dynamic_hedging" src="https://github.com/user-attachments/assets/443b47b7-6e27-49bc-87e5-64cd27575bdb" />
+
 Below figure is an example of the dynamic hedging visualization with default values and 100 options. At each time step, it returns strategy as to how many extra stocks should be shorted / longed.
 <img width="2260" height="1467" alt="delta_hedge_simulation_3" src="https://github.com/user-attachments/assets/f76b49a4-d648-46c8-9ae4-2c9fc4d77180" />
 
