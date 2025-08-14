@@ -109,8 +109,20 @@ Below is an example for the default values
 
 
 
-Below figure shows call option greek values according to time to Maturity. Theta is always negative, while Vega is always positive.
-<img width="2560" height="1638" alt="call_Greeks_vs_T" src="https://github.com/user-attachments/assets/195c8ed0-baa2-491e-bf9f-971b0887826b" />
+Below four figures show call option greek values according to time to Maturity. Delta is in between 0 and 1, Theta is always negative, while Vega is always positive.
+<img width="2100" height="1463" alt="Delta_vs_T" src="https://github.com/user-attachments/assets/4f6ee159-e369-4c12-9c20-a3938596889c" />
+<img width="2127" height="1463" alt="Gamma_vs_T" src="https://github.com/user-attachments/assets/53944421-fffe-4497-8cba-0b0f388d7e48" />
+<img width="2060" height="1463" alt="Theta_vs_T" src="https://github.com/user-attachments/assets/cc8cf175-b0be-4484-b076-fe61e061f9ad" />
+<img width="2060" height="1463" alt="Vega_vs_T" src="https://github.com/user-attachments/assets/2b330e2f-6e5c-4652-b644-7e57d036264c" />
 
 
-Future implementation in this project will include MC progression, volatility modeling, and hedging stretegies. Opinions on the currect set up is welcome.
+
+### 4. Dynamic Delta Hedging under MC stock simulation
+Under the same command option `--run-greeks`, it automatically runs a MC simulation of stock progression using formula of geometric brownian motion. You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
+In the meantime, it produces a strategy for dynamic hedging by longing call options. You can also edit the number of call options `--options`. The code plots the first five paths.
+```
+python run_pricing_analysis.py --run-greeks -M 20 -N 20 -options 200
+```
+Below figure is an example of the dynamic hedging visualization with default values and 100 options. At each time step, it returns strategy as to how many extra stocks should be shorted / longed.
+<img width="2260" height="1467" alt="delta_hedge_simulation_3" src="https://github.com/user-attachments/assets/f76b49a4-d648-46c8-9ae4-2c9fc4d77180" />
+
