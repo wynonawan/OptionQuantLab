@@ -1,7 +1,8 @@
 # OptionQuantLab
-This quant lab repo is built for exploring and visualizing various financial theories, as well as observing how they behave with applying real market parameters.
-It implements multiple calculations for options, including Black-Scholes equations, Crank-Nicolson PDE and Greeks.
-BS equations here are typically used for European options with non-dividend yields, while PDE are considered more for American options with early-excercise.
+This quant lab repo is built for exploring and visualizing various option theories for peronsal interest, as well as evaluating strategies under real input.
+It implements option pricing methods, including Black-Scholes equations, Crank-Nicolson PDE.
+BS equations here are typically used for European options with non-dividend yields, while PDE are considered more for American options with early-excercise.  This project also integrates greeks parameter calculation to observe market behaviors over time, and simulates dynamic delta hedging over stock progression, which is oftenly used by market makers to neutralize risks. 
+
 Users can access online stock information as parameter inputs for more real-scenario analysis.
 
 ## Contents
