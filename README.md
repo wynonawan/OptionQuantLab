@@ -4,6 +4,14 @@ It implements multiple calculations for options, including Black-Scholes equatio
 BS equations here are typically used for European options with non-dividend yields, while PDE are considered more for American options with early-excercise.
 Users can access online stock information as parameter inputs for more real-scenario analysis.
 
+## Contents
+
+- [Install](#installation-steps)
+- Running the Quant Project:
+  - [Black-Scholes / CN PDE Option Pricing](#1-option-pricing-using-black-scholes-equations-and-crank-nicolson-pde)
+  - [Input Real Stock Data](#2-real-stock-data)
+  - [Greeks Calculation](#3-running-the-greeks)
+  - [Dynamic Delta Hedging](#4-dynamic-delta-hedging-under-mc-stock-simulation)
 
 ## Installation Steps
 ### 1. Get this repository by running:
