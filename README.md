@@ -55,9 +55,39 @@ brew install libomp
 
 ## * Running the Quant Project
 
-### 1. Option pricing using Black-Scholes equations and Crank-Nicolson PDE
+### 1. Option pricing using Black-Scholes
 
-The functions are implemented in script `pricing_processor.py` as an import fo `run_pricing_analysis.py`. To simply get the call and put pricings with default parameters (stock, strike, expiry, volatility), run:
+The **Black-Scholes formulas** for European call and put option pricing:
+
+#### Call Option
+
+$$
+C = S \cdot N(d_1) - K e^{-rT} \cdot N(d_2),
+$$
+
+#### Put Option
+
+$$
+P = K e^{-rT} \cdot N(-d_2) - S \cdot N(-d_1),
+$$
+
+where
+
+$$
+d_1 = \frac{\ln(S/K) + \left(r + \frac{\sigma^2}{2}\right) T}{\sigma \sqrt{T}}, \quad
+d_2 = d_1 - \sigma \sqrt{T}
+$$
+
+**Variables:**
+
+- `S` = Stock price  
+- `K` = Strike price  
+- `T` = Time to maturity (in years)  
+- `r` = Risk-free interest rate  
+- `σ` = Volatility of the underlying asset  
+- `N(x)` = Cumulative distribution function (CDF) of the standard normal distribution  
+
+The equations are implemented in script `pricing_processor.py` as an import fo `run_pricing_analysis.py`. To get the call and put pricings with default parameters (stock, strike, expiry, volatility), run:
 ```
 python run_pricing_analysis.py
 ```
@@ -74,6 +104,50 @@ In the meantime, figures are produced in directory `plots`. Below are example pl
 
 <img width="1329" height="1067" alt="put_option_3D_map" src="https://github.com/user-attachments/assets/12f5bc64-1545-47b2-a44d-e408ecf61556" />
 
+### 2. Crank-Nicolson PDE for Option Pricing
+
+The Crank-Nicolson method is a finite difference scheme used to numerically solve the **Black-Scholes Partial Differential Equation (PDE)** for European options:
+
+#### Black-Scholes PDE
+
+$$
+\frac{\partial V}{\partial t} + \frac{1}{2} \sigma^2 S^2 \frac{\partial^2 V}{\partial S^2} + r S \frac{\partial V}{\partial S} - r V = 0
+$$
+
+where:
+
+- `V(S,t)` = option value as a function of stock price `S` and time `t`  
+- `σ` = volatility of the underlying asset  
+- `r` = risk-free interest rate  
+- `S` = underlying asset price  
+
+---
+
+#### Crank-Nicolson Discretization
+
+For a grid with stock price steps `i` and time steps `j`, the Crank-Nicolson scheme approximates the PDE as:
+
+$$
+- \alpha_i V_{i-1}^{j+1} + (1 + 2\alpha_i) V_i^{j+1} - \alpha_i V_{i+1}^{j+1} = 
+\alpha_i V_{i-1}^{j} + (1 - 2\alpha_i) V_i^{j} + \alpha_i V_{i+1}^{j}
+$$
+
+where:
+
+- $\alpha_i = \frac{1}{4} \sigma^2 i^2 \Delta t - \frac{1}{4} r i \Delta t$  
+- $\Delta t$ = time step  
+- $\Delta S$ = stock price step  
+
+This results in a **tridiagonal system of equations** that can be solved iteratively to get option prices at all grid points.
+
+---
+
+#### Notes
+
+- Crank-Nicolson is **implicit and stable**, and provides a second-order accurate approximation in both time and space.  
+- It is widely used for **European call/put options** and can be extended to handle **American options** with early exercise constraints.
+- See [reference](http://www.goddardconsulting.ca/matlab-finite-diff-crank-nicolson.html)
+
 
 The call option pricing visualization from Crank-Nicolson PDE is indicated in below figure:
 
@@ -85,7 +159,7 @@ You can also check the error convergence comparing the BS and PDE models. The be
 
 
 
-### 2. Real-stock data
+### 3. Real-stock data
 To obtain a specific company information, including the latest closing stock price, strike prices at specific dates, use command option `-c`, `-e` and `-K` run:
 ```
 python run_pricing_analysis.py -c AAPL -e 2025-09-05 -K 140
@@ -103,9 +177,11 @@ It also inputs the parameter values from extracted data online to the Black-Scho
 
 
 
-### 3. Running the Greeks
+### 4. Running the Greeks
 The Greeks parameters are incorporated in script `greeks_processor.py`
 You can also run the Greek calculations including Delta, Gamma, Theta, and Vega that measure how the option prices are sensitive to underlying stock price, time and volatility.
+
+
 ```
 python run_pricing_analysis.py --run-greeks
 ```
@@ -126,7 +202,7 @@ Below four figures show call option greek values according to time to Maturity. 
 
 
 
-### 4. Dynamic Delta Hedging under MC stock simulation
+### 5. Dynamic Delta Hedging under MC stock simulation
 Under the same command option `--run-greeks`, it automatically runs a MC simulation of stock progression using formula of geometric brownian motion. You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
 In the meantime, it produces a strategy for dynamic hedging by longing call options. You can also edit the number of call options `--options`. The code plots the first five paths.
 ```
