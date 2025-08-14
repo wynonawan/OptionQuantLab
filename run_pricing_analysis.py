@@ -24,7 +24,7 @@ from tabulate import tabulate
 from termcolor import colored
 
 import pricing_processor
-import greeks_processor
+import greeks_hedging_processor
 
 
 def company_option(company, expiry, strike_price):
@@ -82,7 +82,10 @@ if __name__ == '__main__':
     parser.add_argument('--output','-o'   , default='plots', help = 'Name of the output directory')
     parser.add_argument('--company', '-c', default=None, help = 'input the company name for online info')
     parser.add_argument('--expiry', '-e', default='', help = 'input expiry date')
-    parser.add_argument('--run-greeks',  action='store_true', help = 'run greeks analysis') 
+    parser.add_argument('--run-greeks',  action='store_true', help = 'run greeks analysis')
+    parser.add_argument('--mc-paths','-M' , type=int, default=10, help = 'number of mc hedge simulation paths')
+    parser.add_argument('--num-steps','-N' , type=int, default=20, help = 'number of time steps')
+    parser.add_argument('--options' , type=int, default=100, help = 'number of options')
 
     args = parser.parse_args()
     stock      = args.stock
@@ -95,16 +98,19 @@ if __name__ == '__main__':
     company    = args.company
     expiry     = args.expiry
     run_greeks = args.run_greeks
-    #today = pd.Timestamp.now()
+    mc_paths   = args.mc_paths
+    num_steps  = args.num_steps
+    options    = args.options
     today = datetime.now().date()
 
-    print('\n')
-    print(f"time to Maturity in year")
     if expiry:
        expiry_strp = datetime.strptime(expiry, '%Y-%m-%d').date()
 
        time = (expiry_strp - today).days / 365
+       print('\n')
+       print(f"time to Maturity in year")
        print("time", time)
+
     else:
        expiry = today + timedelta(days=365 * time)
 
@@ -145,7 +151,7 @@ if __name__ == '__main__':
         print(tabulate(company_table, headers="keys", tablefmt="fancy_grid", showindex=False))
 
 
-    pricing_processor.run_pricing(S=stock, T=time, K=strike, r=interest, sigma=volatility, y=dividend, output=output)
+    estimated_call, estimated_put = pricing_processor.run_pricing(S=stock, T=time, K=strike, r=interest, sigma=volatility, y=dividend, output=output)
     if run_greeks:
-        greeks_processor.run_Greeks(S=stock, K=strike, T=time, r=interest, sigma=volatility, y=dividend, output=output) 
+        greeks_hedging_processor.run_greeks_hedging(S=stock, K=strike, T=time, r=interest, sigma=volatility, y=dividend, output=output, call_price=estimated_call, N=num_steps, M=mc_paths, options=options) 
          
