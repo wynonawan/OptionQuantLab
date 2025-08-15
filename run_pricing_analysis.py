@@ -3,6 +3,7 @@
 	1. Black-Scholes equations & CN PDE estimates for options (pricing_processor.py)
         2. Greeks estimates 
         3. MC simulation of stock price (Geometric Brownian)
+        4. Dynamic delta hedging over simulated stock
 
         Users can input any features in the BS equation for their own estimation,
 	i.e. stock price (S), strike price (K), time to maturity (T), interest rate (r), dividend (q).
@@ -12,6 +13,9 @@
 
 	Run command with online input (example 'AAPL'):
         `python run_pricing_analysis.py -c AAPL -e 2025-09-05 -K 140 -sg .40 -r 0.01 -y 0.10 -T 0.05 `
+
+	Run greeks and delta hedging:
+        `python run_pricing_analysis.py --run-greeks`
 
 '''
 
