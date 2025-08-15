@@ -226,10 +226,12 @@ $$
 \Theta_{\text{put}} = \frac{\partial P}{\partial T} = -\frac{S N'(d_1) \sigma}{2 \sqrt{T}} + r K e^{-r T} N(-d_2)
 $$
 
+You can calculate all these greek values by adding `--run-greeks` command option as,
 
 ```
 python run_pricing_analysis.py --run-greeks
 ```
+
 With default values, or if you specify a company `-c`, this code will return a table with all the greek values.
 Below is an example for the default values
 
@@ -301,11 +303,11 @@ where:
 - $Z \sim N(0,1)$ = standard normal random variable
 
 
-Under the same command option `--run-greeks`, You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
-In the meantime, it produces a strategy for dynamic hedging by longing call options. You can also edit the number of call options `--options`. The code plots the first five paths.
+Running command option `--run-greeks`, you will automatically get mc simulation of stock price and delta hedging calculations / plots. Currently the strategy is only for longing call option. You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`. To edit the number of options, you can use `--options`.
 ```
 python run_pricing_analysis.py --run-greeks -M 20 -N 20 -options 200
 ```
+
 ##### Hedging example: Long call options
 The below print out returns 10 mc paths with estimated P&L using dynamic delta hedging while longing call options.
 You can see that the P&L off all paths are approximately zero, which is what we expect to see.
