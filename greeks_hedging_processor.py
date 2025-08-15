@@ -1,3 +1,13 @@
+```
+       This script is used as an import to `run_pricing_processor.py`
+       It implements these functions:
+       1. Greeks calculation of options given stock price, strike price, volatility, interest, dividend and time to maturity. 
+       2. MC simulation of stock with geometric brownian motion formula
+       3. Performs dynamic delta hedging for the simulated path and returns hedging position at each time step. Givens P&L of approximately zero each time.
+
+
+```
+
 
 from tabulate import tabulate
 
