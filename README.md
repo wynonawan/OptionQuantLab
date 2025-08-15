@@ -13,7 +13,7 @@ Users can access online stock information as parameter inputs for more real-scen
   - [Crank-Nicolson PDE Option Pricing](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#2-crank-nicolson-pde-for-option-pricing)
   - [Input Real Stock Data](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#3-real-stock-data)
   - [Greeks Calculation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#4-running-the-greeks)
-  - [Dynamic Delta Hedging on MC simulation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#5-dynamic-delta-hedging-under-mc-stock-simulation)
+  - [Dynamic Delta Hedging on MC Simulation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#5-dynamic-delta-hedging-under-mc-stock-simulation)
 
 ## Installation Steps
 ### 1. Get this repository by running:
@@ -56,7 +56,7 @@ brew install libomp
 
 ## * Running the Quant Project
 
-### 1. Option pricing using Black-Scholes
+### 1. Option pricing using Black-Scholes Equations
 
 The **Black-Scholes formulas** for European call and put option pricing:
 
@@ -164,7 +164,7 @@ You can also check the error convergence comparing the BS and PDE models. The be
 
 
 
-### 3. Real-stock data
+### 3. Real-stock Data
 To obtain a specific company information, including the latest closing stock price, strike prices at specific dates, use command option `-c`, `-e` and `-K` run:
 ```
 python run_pricing_analysis.py -c AAPL -e 2025-09-05 -K 140
@@ -249,7 +249,7 @@ Below four example figures show call option greek values according to time to ma
 
 
 
-### 5. Dynamic Delta Hedging under MC stock simulation
+### 5. Dynamic Delta Hedging under MC Stock Simulation
 
 For neutralizing the price risk of an option position with respect to small changes in the underlying asset price, the method of Delta hedging is commonly used. It builts a portfolio that contains options and the stock shares, and offsets the option's price sensitivity to the underlying aseet by taking a position in the underlying asset. 
 For instance:
