@@ -9,10 +9,11 @@ Users can access online stock information as parameter inputs for more real-scen
 
 - [Install](#installation-steps)
 - Running the Quant Project:
-  - [Black-Scholes / CN PDE Option Pricing](#1-option-pricing-using-black-scholes-equations-and-crank-nicolson-pde)
-  - [Input Real Stock Data](#2-real-stock-data)
-  - [Greeks Calculation](#3-running-the-greeks)
-  - [Dynamic Delta Hedging](#4-dynamic-delta-hedging-under-mc-stock-simulation)
+  - [Black-Scholes Equations](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#1-option-pricing-using-black-scholes)
+  - [Crank-Nicolson PDE Option Pricing](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#2-crank-nicolson-pde-for-option-pricing)
+  - [Input Real Stock Data](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#3-real-stock-data)
+  - [Greeks Calculation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#4-running-the-greeks)
+  - [Dynamic Delta Hedging](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#5-dynamic-delta-hedging-under-mc-stock-simulation)
 
 ## Installation Steps
 ### 1. Get this repository by running:
