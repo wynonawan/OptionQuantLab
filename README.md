@@ -13,7 +13,7 @@ Users can access online stock information as parameter inputs for more real-scen
   - [Crank-Nicolson PDE Option Pricing](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#2-crank-nicolson-pde-for-option-pricing)
   - [Input Real Stock Data](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#3-real-stock-data)
   - [Greeks Calculation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#4-running-the-greeks)
-  - [Dynamic Delta Hedging](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#5-dynamic-delta-hedging-under-mc-stock-simulation)
+  - [Dynamic Delta Hedging on MC simulation](https://github.com/wynonawan/OptionQuantLab?tab=readme-ov-file#5-dynamic-delta-hedging-under-mc-stock-simulation)
 
 ## Installation Steps
 ### 1. Get this repository by running:
@@ -287,7 +287,21 @@ $$
 \text{Stock position at } t_j = \Delta_j \times (\text{number of options})
 $$
 
-Under the same command option `--run-greeks`, it automatically runs a MC simulation of stock progression using formula of geometric brownian motion. You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
+In order to test out hedging strategy, the code also performs MC simulation over stock price following Geometric Brownian motion (GBM):
+
+$$
+S_{t+\Delta t} = S_t \times \exp \Big( (r - \frac{1}{2}\sigma^2) \Delta t + \sigma \sqrt{\Delta t} Z \Big)
+$$
+
+where:  
+
+- $\Delta t$ = time step  
+- $S_t$ = current stock price  
+- $S_{t+\Delta t}$ = stock price at next time step
+- $Z \sim N(0,1)$ = standard normal random variable
+
+
+Under the same command option `--run-greeks`, You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
 In the meantime, it produces a strategy for dynamic hedging by longing call options. You can also edit the number of call options `--options`. The code plots the first five paths.
 ```
 python run_pricing_analysis.py --run-greeks -M 20 -N 20 -options 200
