@@ -128,15 +128,19 @@ where:
 For a grid with stock price steps `i` and time steps `j`, the Crank-Nicolson scheme approximates the PDE as:
 
 $$
-- \alpha_i V_{i-1}^{j+1} + (1 + 2\alpha_i) V_i^{j+1} - \alpha_i V_{i+1}^{j+1} = 
+\alpha_i V_{i-1}^{j+1} + (1 + 2\alpha_i) V_i^{j+1} + \alpha_i V_{i+1}^{j+1} = 
 \alpha_i V_{i-1}^{j} + (1 - 2\alpha_i) V_i^{j} + \alpha_i V_{i+1}^{j}
 $$
+
+
 
 where:
 
 - $\alpha_i = \frac{1}{4} \sigma^2 i^2 \Delta t - \frac{1}{4} r i \Delta t$  
-- $\Delta t$ = time step  
-- $\Delta S$ = stock price step  
+- $\Delta t$ = time step
+- $V_{i}^{j}$ = value at current time step
+- $V_{i}^{j+1}$ = value at next time step
+
 
 This results in a **tridiagonal system of equations** that can be solved iteratively to get option prices at all grid points.
 
@@ -181,11 +185,51 @@ It also inputs the parameter values from extracted data online to the Black-Scho
 The Greeks parameters are incorporated in script `greeks_processor.py`
 You can also run the Greek calculations including Delta, Gamma, Theta, and Vega that measure how the option prices are sensitive to underlying stock price, time and volatility.
 
+**Delta: Stock price sensitive**
+
+
+
+$$
+\Delta_{\text{call}} = \frac{\partial C}{\partial S} = N(d_1)
+$$
+
+
+
+$$
+\Delta_{\text{put}} = \frac{\partial P}{\partial S} = N(d_1) - 1
+$$
+
+**Gamma: Delta to stock price sensitive**
+
+$$
+\Gamma = \frac{\partial^{2} C}{\partial S^{2}} = \frac{\partial^{2} P}{\partial S^{2}} = \frac{\partial^{2} P}{\partial S^{2}}
+$$
+
+**Vega: Volatility sensitive**
+
+$$
+\text{Vega} = \frac{\partial P}{\partial \sigma} = \frac{\partial P}{\partial \sigma} = S \, N'(d_1) \sqrt{T}
+$$
+
+**Theta: time sensitive**
+
+
+
+$$
+\Theta_{\text{call}} = \frac{\partial C}{\partial T}  = -\frac{S N'(d_1) \sigma}{2 \sqrt{T}} - r K e^{-r T} N(d_2)
+$$
+
+
+
+$$
+\Theta_{\text{put}} = \frac{\partial P}{\partial T} = -\frac{S N'(d_1) \sigma}{2 \sqrt{T}} + r K e^{-r T} N(-d_2)
+$$
+
 
 ```
 python run_pricing_analysis.py --run-greeks
 ```
-With default values, or if you specify a company `-c`, this code will return a table.
+With default values, or if you specify a company `-c`, this code will return a table with all the greek values.
 Below is an example for the default values
 
 <img width="284" height="204" alt="call_greeks" src="https://github.com/user-attachments/assets/0288b434-1da9-4072-8745-3914dd3b0bea" />
@@ -193,8 +237,8 @@ Below is an example for the default values
 <img width="264" height="203" alt="put_greeks" src="https://github.com/user-attachments/assets/a8b6b170-2552-4a4f-88d8-8e103a9bbd0a" />
 
 
-
-Below four figures show call option greek values according to time to Maturity. Delta is in between 0 and 1, Theta is always negative, while Vega is always positive.
+In addition, this command also plots the progression of greek values in respect to time to maturity. 
+Below four example figures show call option greek values according to time to maturity. Delta is in between 0 and 1, Theta is always negative, while Vega is always positive.
 <img width="2100" height="1463" alt="Delta_vs_T" src="https://github.com/user-attachments/assets/4f6ee159-e369-4c12-9c20-a3938596889c" />
 <img width="2127" height="1463" alt="Gamma_vs_T" src="https://github.com/user-attachments/assets/53944421-fffe-4497-8cba-0b0f388d7e48" />
 <img width="2060" height="1463" alt="Theta_vs_T" src="https://github.com/user-attachments/assets/cc8cf175-b0be-4484-b076-fe61e061f9ad" />
@@ -203,15 +247,56 @@ Below four figures show call option greek values according to time to Maturity. 
 
 
 ### 5. Dynamic Delta Hedging under MC stock simulation
+
+For neutralizing the price risk of an option position with respect to small changes in the underlying asset price, the method of Delta hedging is commonly used. It builts a portfolio that contains options and the stock shares, and offsets the option's price sensitivity to the underlying aseet by taking a position in the underlying asset. 
+For instance:
+
+Hedged portfolio:
+
+$$
+\Pi = V - \Delta S
+$$
+
+where $\Pi$ is the value of the hedged portfolio.
+
+Shares to hold per option:
+
+$$
+\text{Shares} = \Delta \times (\text{number of options})
+$$
+
+Example for call/put options:
+
+$$
+\Delta_{\text{call}} = N(d_1), \quad \Delta_{\text{put}} = N(d_1) - 1
+$$
+
+To maintain a neutral-risk position:
+
+$$
+d\Pi \approx dV - \Delta dS \rightarrow \text{should be approximately zero}
+$$
+
+For Ddynamic (Discrete-time) hedging:
+
+Since delta would change over time, you can re-hedge periodically by shorting or longing shares to maintain the best stock position
+At time \(t_j\), rehedge using the current delta:  
+
+$$
+\text{Stock position at } t_j = \Delta_j \times (\text{number of options})
+$$
+
 Under the same command option `--run-greeks`, it automatically runs a MC simulation of stock progression using formula of geometric brownian motion. You can input the number of mc paths you will want to see `-M`, the number of time steps you want to set `-N`.
 In the meantime, it produces a strategy for dynamic hedging by longing call options. You can also edit the number of call options `--options`. The code plots the first five paths.
 ```
 python run_pricing_analysis.py --run-greeks -M 20 -N 20 -options 200
 ```
-The below print out returns 10 mc paths with estimated P&L using delta hedging.
+##### Hedging example: Long call options
+The below print out returns 10 mc paths with estimated P&L using dynamic delta hedging while longing call options.
+You can see that the P&L off all paths are approximately zero, which is what we expect to see.
 
 <img width="300" height="174" alt="dynamic_hedging" src="https://github.com/user-attachments/assets/443b47b7-6e27-49bc-87e5-64cd27575bdb" />
 
-Below figure is an example of the dynamic hedging visualization with default values and 100 options. At each time step, it returns strategy as to how many extra stocks should be shorted / longed.
+Below figure is an example of the dynamic hedging visualization with default values and 100 options. At each time step, it returns strategy as to how many extra stocks should be shorted / longed, to result in final P&L of almost zero.
 <img width="2260" height="1467" alt="delta_hedge_simulation_3" src="https://github.com/user-attachments/assets/f76b49a4-d648-46c8-9ae4-2c9fc4d77180" />
 
