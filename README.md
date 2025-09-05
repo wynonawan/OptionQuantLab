@@ -1,7 +1,7 @@
 # OptionQuantLab
 This quant lab repo is built for exploring and visualizing various option theories for peronsal interest, as well as evaluating strategies under real input.
 It implements option pricing methods, including Black-Scholes equations, Crank-Nicolson PDE.
-BS equations here are typically used for European options with non-dividend yields, while PDE are considered more for American options with early-excercise.  This project also integrates greeks parameter calculation to observe market behaviors over time, and simulates dynamic delta hedging over stock progression, which is oftenly used by market makers to neutralize risks. 
+BS equations here are typically used for European options with non-dividend yields, while CN PDE can sometimes be used for American options with early-excercise.  This project also integrates greeks parameter calculation to observe market behaviors over time, and simulates dynamic delta hedging over stock progression, which is oftenly used by market makers to neutralize risks. 
 
 Users can access online stock information as parameter inputs for more real-scenario analysis.
 
@@ -126,22 +126,44 @@ where:
 
 #### Crank-Nicolson Discretization
 
-For a grid with stock price steps `i` and time steps `j`, the Crank-Nicolson scheme approximates the PDE as:
+For a grid with stock price steps `i` and time steps `n`, the Crank-Nicolson scheme approximates the PDE as:
 
 $$
-\alpha_i V_{i-1}^{j+1} + (1 + 2\alpha_i) V_i^{j+1} + \alpha_i V_{i+1}^{j+1} = 
-\alpha_i V_{i-1}^{j} + (1 - 2\alpha_i) V_i^{j} + \alpha_i V_{i+1}^{j}
+\bigl(I - \tfrac{1}{2} \Delta t L \bigr) V^{n+1} =
+\bigl(I + \tfrac{1}{2} \Delta t L \bigr) V^{n},
 $$
 
+
+$$
+L V_i = a_i V_{i-1} + b_i V_i + c_i V_{i+1}, \quad i = 1, 2, \dots, M-1,
+$$
+
+$$
+a_i = \frac{1}{2}\sigma^2 \frac{S_i^2}{(\Delta S)^2} - \frac{1}{2} r \frac{S_i}{\Delta S}, \quad
+b_i = - \sigma^2 \frac{S_i^2}{(\Delta S)^2} - r, \quad
+c_i = \frac{1}{2}\sigma^2 \frac{S_i^2}{(\Delta S)^2}+ \frac{1}{2} r \frac{S_i}{\Delta S}.
+$$
 
 
 where:
 
-- $\alpha_i = \frac{1}{4} \sigma^2 i^2 \Delta t - \frac{1}{4} r i \Delta t$  
-- $\Delta t$ = time step
-- $V_{i}^{j}$ = value at current time step
-- $V_{i}^{j+1}$ = value at next time step
+- $V_i^n$ is the option value at stock price $S_i$ and time $t_n$,  
+- $\Delta t$ is the time step,  
+- $\Delta S$ is the stock price step,  
+- $\sigma$ is the volatility, and  
+- $r$ is the risk-free rate.  
 
+The boundary conditions are:
+
+$$
+V_0(t) = 0, \quad V_M(t) = S_{\max} - K e^{-r(T-t)},
+$$
+
+and the initial condition at maturity is
+
+$$
+V_i(T) = \max(S_i - K, 0).
+$$
 
 This results in a **tridiagonal system of equations** that can be solved iteratively to get option prices at all grid points.
 
@@ -151,7 +173,7 @@ This results in a **tridiagonal system of equations** that can be solved iterati
 
 - Crank-Nicolson is **implicit and stable**, and provides a second-order accurate approximation in both time and space.  
 - It is widely used for **European call/put options** and can be extended to handle **American options** with early exercise constraints.
-- See [reference](http://www.goddardconsulting.ca/matlab-finite-diff-crank-nicolson.html)
+- See paper reference [here](https://www.researchgate.net/publication/362936951_Solution_of_the_Black-Scholes_Equation_by_Finite_Difference_Schemes).
 
 
 The call option pricing visualization from Crank-Nicolson PDE is indicated in below figure:
